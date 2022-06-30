@@ -10,3 +10,5 @@ class GreatProduct(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2,
                                 validators=[MinValueValidator(Decimal('0.00')), MaxValueValidator(Decimal('99999999.99'))])
     updated_at = models.DateTimeField(blank=True)
+
+    objects = models.Manager()
