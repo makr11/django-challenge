@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User, Group
-from app.models import GreatProduct
+from app.models import GreatProduct, UserRatings
 from rest_framework import viewsets
 from rest_framework import permissions
-from app.serializers import UserSerializer, GroupSerializer, GreatProductSerializer
+from rest_framework import mixins
+from app.serializers import UserSerializer, GroupSerializer, GreatProductSerializer, UserRatingsSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -24,6 +25,20 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class GreatProductViewSet(viewsets.ModelViewSet):
-    queryset = GreatProduct.objects.all().order_by('-updated_at')
     serializer_class = GreatProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        order_by = self.request.query_params.get('order_by', 'updated_at')
+        order = '-' if self.request.query_params.get('order', 'asc') == "desc" else ''
+        return GreatProduct.objects.all().order_by(f'{order}{order_by}')
+
+
+class UserRatingsViewSet(mixins.CreateModelMixin,
+                         mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         viewsets.GenericViewSet):
+
+    serializer_class = UserRatingsSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = UserRatings.objects.all().order_by('-created_at')

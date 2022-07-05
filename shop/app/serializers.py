@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from app.models import GreatProduct
+from app.models import GreatProduct, UserRatings
 from rest_framework import serializers
 
 
@@ -19,3 +19,9 @@ class GreatProductSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = GreatProduct
         fields = ['name', 'rating', 'price', 'updated_at']
+
+
+class UserRatingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRatings
+        fields = ['user', 'product', 'rating', 'created_at']
