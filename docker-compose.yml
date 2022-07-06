@@ -5,11 +5,15 @@ services:
     container_name: postgres
     restart: always
     env_file:
-      - postgres.env
+      - .env
     ports:
       - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -56,7 +60,7 @@ services:
     container_name: shop
     command: python manage.py runserver 0.0.0.0:8000
     env_file:
-      - postgres.env
+      - .env
     volumes:
       - ./shop:/app
     ports:
@@ -66,6 +70,36 @@ services:
         condition: service_healthy
       elasticsearch:
          condition: service_healthy
+
+  redis:
+    image: redis
+    command: redis-server --requirepass redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+  pgsync:
+    build:
+      context: .
+      dockerfile: pgsync/Dockerfile
+    sysctls:
+      - net.ipv4.tcp_keepalive_time=200
+      - net.ipv4.tcp_keepalive_intvl=200
+      - net.ipv4.tcp_keepalive_probes=5
+    command: sh -c "bootstrap --config schema.json && pgsync --config schema.json --daemon"
+    labels:
+      org.label-schema.name: "pgsync"
+      org.label-schema.description: "Postgres to elasticsearch sync"
+      com.label-schema.service-type: "daemon"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   elasticsearch-data:

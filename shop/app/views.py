@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User, Group
-from django.db import connection
 from app.models import GreatProduct, UserRatings
 from rest_framework import viewsets
 from rest_framework import permissions
@@ -48,8 +47,6 @@ class UserRatingsViewSet(mixins.CreateModelMixin,
         response = super().create(request, *args, **kwargs)
         product_id = request.data.get("product")
         rating_avg = UserRatings.get_product_avg_rating(product_id)
-        update = f'UPDATE {GreatProduct._meta.db_table} SET rating = %s WHERE id=%s'
-        with connection.cursor() as cursor:
-            cursor.execute(update, [rating_avg, product_id])
+        GreatProduct.update_rating(product_id, rating_avg)
         return response
 

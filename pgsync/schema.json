@@ -1,0 +1,23 @@
+[
+    {
+        "database": "shop-db",
+        "index": "app_greatproduct",
+        "mapping": {
+            "mappings": {
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "analyzer": "simple"
+                    }
+                }
+              }
+        },
+        "nodes": {
+            "table": "app_greatproduct",
+            "columns": [
+                "id",
+                "name"
+            ]
+        }
+    }
+]

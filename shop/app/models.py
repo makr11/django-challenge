@@ -2,7 +2,8 @@ from django.db import models
 from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
-from django.db.models import Avg, Func
+from django.db.models import Avg
+from django.db import connection
 
 
 class GreatProduct(models.Model):
@@ -18,9 +19,15 @@ class GreatProduct(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def update_rating(cls, product_id, rating_avg):
+        update = f'UPDATE {GreatProduct._meta.db_table} SET rating = %s WHERE id=%s'
+        with connection.cursor() as cursor:
+            cursor.execute(update, [rating_avg, product_id])
+
 
 class UserRatings(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.RESTRICT)
     product = models.ForeignKey(GreatProduct, on_delete=models.CASCADE)
     rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     created_at = models.DateTimeField(auto_now=True, blank=True)
