@@ -53,4 +53,3 @@ class UserRatingsViewSet(mixins.CreateModelMixin,
         rating_avg = UserRatings.get_product_avg_rating(product_id)
         GreatProduct.update_rating(product_id, rating_avg)
         return response
-

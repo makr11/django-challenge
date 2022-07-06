@@ -46,6 +46,7 @@ class GreatProduct(models.Model):
         )
 
         id_list = [doc['_source']['id'] for doc in response['hits']['hits']]
+        pass
         return id_list
 
 
