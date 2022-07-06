@@ -31,7 +31,11 @@ class GreatProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         order_by = self.request.query_params.get('order_by', 'updated_at')
         order = '-' if self.request.query_params.get('order', 'asc') == "desc" else ''
-        return GreatProduct.objects.all().order_by(f'{order}{order_by}')
+        if search_term := self.request.query_params.get('search', None):
+            id_list = GreatProduct.search(search_term)
+            return GreatProduct.objects.filter(pk__in=id_list).order_by(f'{order}{order_by}')
+        else:
+            return GreatProduct.objects.all().order_by(f'{order}{order_by}')
 
 
 class UserRatingsViewSet(mixins.CreateModelMixin,
