@@ -1,9 +1,9 @@
+from os import environ
 from django.contrib.auth.models import User, Group
 from app.models import GreatProduct, UserRatings
-from rest_framework import viewsets
-from rest_framework import permissions
-from rest_framework import mixins
+from rest_framework import viewsets, permissions, mixins, filters
 from app.serializers import UserSerializer, GroupSerializer, GreatProductSerializer, UserRatingsSerializer
+from elasticsearch import Elasticsearch
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -24,24 +24,62 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class FilterByProductName(filters.SearchFilter):
+    """
+    Filter that only allows users to see their own objects.
+    """
+    def filter_queryset(self, request, queryset, view):
+        search_fields = self.get_search_fields(view, request)
+        search_terms = self.get_search_terms(request)
+
+        if not search_fields or not search_terms:
+            return queryset
+
+        es_client = Elasticsearch(
+            f'{environ["ELASTICSEARCH_SCHEME"]}://{environ["ELASTICSEARCH_HOST"]}:{environ["ELASTICSEARCH_PORT"]}'
+        )
+
+        response = es_client.search(
+            index='app_greatproduct',
+            query={
+                "match": {
+                    "name": {
+                        "query": search_terms[0],
+                        "fuzziness": "AUTO"
+                    }
+                }
+            }
+        )
+
+        id_list = [doc['_source']['id'] for doc in response['hits']['hits']]
+        return GreatProduct.objects.filter(pk__in=id_list)
+
+
 class GreatProductViewSet(viewsets.ModelViewSet):
+    """
+    Provides CRUD methods on Great Products.\n
+    Search by fuzzy matching is enabled.\n
+    Accepts ordering on any field.
+    """
+    queryset = GreatProduct.objects.all()
     serializer_class = GreatProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = (filters.OrderingFilter, FilterByProductName)
 
-    def get_queryset(self):
-        order_by = self.request.query_params.get('order_by', 'updated_at')
-        order = '-' if self.request.query_params.get('order', 'asc') == "desc" else ''
-        if search_term := self.request.query_params.get('search', None):
-            id_list = GreatProduct.search(search_term)
-            return GreatProduct.objects.filter(pk__in=id_list).order_by(f'{order}{order_by}')
-        else:
-            return GreatProduct.objects.all().order_by(f'{order}{order_by}')
+    ordering_fields = '__all__'
+
+    ordering = ('-updated_at',)
+
+    search_fields = ['name']
 
 
 class UserRatingsViewSet(mixins.CreateModelMixin,
                          mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          viewsets.GenericViewSet):
+    """
+    Give product ratings, only one rating per product is allowed for specific user.
+    """
 
     serializer_class = UserRatingsSerializer
     permission_classes = [permissions.IsAuthenticated]

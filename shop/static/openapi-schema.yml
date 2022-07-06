@@ -320,7 +320,13 @@ paths:
   /products/:
     get:
       operationId: listGreatProducts
-      description: ''
+      description: 'Provides CRUD methods on Great Products.
+
+
+        Search by fuzzy matching is enabled.
+
+
+        Accepts ordering on any field.'
       parameters:
       - name: page
         required: false
@@ -328,6 +334,18 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       responses:
         '200':
           content:
@@ -357,7 +375,13 @@ paths:
       - products
     post:
       operationId: createGreatProduct
-      description: ''
+      description: 'Provides CRUD methods on Great Products.
+
+
+        Search by fuzzy matching is enabled.
+
+
+        Accepts ordering on any field.'
       parameters: []
       requestBody:
         content:
@@ -382,12 +406,30 @@ paths:
   /products/{id}/:
     get:
       operationId: retrieveGreatProduct
-      description: ''
+      description: 'Provides CRUD methods on Great Products.
+
+
+        Search by fuzzy matching is enabled.
+
+
+        Accepts ordering on any field.'
       parameters:
       - name: id
         in: path
         required: true
-        description: ''
+        description: A unique integer value identifying this great product.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
         schema:
           type: string
       responses:
@@ -401,12 +443,30 @@ paths:
       - products
     put:
       operationId: updateGreatProduct
-      description: ''
+      description: 'Provides CRUD methods on Great Products.
+
+
+        Search by fuzzy matching is enabled.
+
+
+        Accepts ordering on any field.'
       parameters:
       - name: id
         in: path
         required: true
-        description: ''
+        description: A unique integer value identifying this great product.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
         schema:
           type: string
       requestBody:
@@ -431,12 +491,30 @@ paths:
       - products
     patch:
       operationId: partialUpdateGreatProduct
-      description: ''
+      description: 'Provides CRUD methods on Great Products.
+
+
+        Search by fuzzy matching is enabled.
+
+
+        Accepts ordering on any field.'
       parameters:
       - name: id
         in: path
         required: true
-        description: ''
+        description: A unique integer value identifying this great product.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
         schema:
           type: string
       requestBody:
@@ -461,12 +539,30 @@ paths:
       - products
     delete:
       operationId: destroyGreatProduct
-      description: ''
+      description: 'Provides CRUD methods on Great Products.
+
+
+        Search by fuzzy matching is enabled.
+
+
+        Accepts ordering on any field.'
       parameters:
       - name: id
         in: path
         required: true
-        description: ''
+        description: A unique integer value identifying this great product.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
         schema:
           type: string
       responses:
@@ -477,7 +573,8 @@ paths:
   /ratings/:
     get:
       operationId: listUserRatings
-      description: ''
+      description: Give product ratings, only one rating per product is allowed for
+        specific user.
       parameters:
       - name: page
         required: false
@@ -514,7 +611,8 @@ paths:
       - ratings
     post:
       operationId: createUserRatings
-      description: ''
+      description: Give product ratings, only one rating per product is allowed for
+        specific user.
       parameters: []
       requestBody:
         content:
@@ -539,7 +637,8 @@ paths:
   /ratings/{id}/:
     get:
       operationId: retrieveUserRatings
-      description: ''
+      description: Give product ratings, only one rating per product is allowed for
+        specific user.
       parameters:
       - name: id
         in: path

@@ -1,11 +1,9 @@
-from os import environ
 from django.db import models
 from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.db import connection
-from elasticsearch import Elasticsearch
 
 
 class GreatProduct(models.Model):
@@ -26,28 +24,6 @@ class GreatProduct(models.Model):
         update = f'UPDATE {GreatProduct._meta.db_table} SET rating = %s WHERE id=%s'
         with connection.cursor() as cursor:
             cursor.execute(update, [rating_avg, product_id])
-
-    @classmethod
-    def search(cls, search_term):
-        es_client = Elasticsearch(
-            f'{environ["ELASTICSEARCH_SCHEME"]}://{environ["ELASTICSEARCH_HOST"]}:{environ["ELASTICSEARCH_PORT"]}'
-        )
-
-        response = es_client.search(
-            index='app_greatproduct',
-            query={
-                "match": {
-                    "name": {
-                        "query": search_term,
-                        "fuzziness": "AUTO"
-                    }
-                }
-            }
-        )
-
-        id_list = [doc['_source']['id'] for doc in response['hits']['hits']]
-        pass
-        return id_list
 
 
 class UserRatings(models.Model):
