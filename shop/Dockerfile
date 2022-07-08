@@ -3,4 +3,5 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY . /app
+RUN apk --no-cache add curl
 RUN pip install -r requirements.txt
